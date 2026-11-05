@@ -24,13 +24,26 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 RUN npm run build
 
-# Unprivileged Nginx listens on 8080 (non-root)
+# Unprivileged Nginx listens on 8080 (non-root UID 101)
 FROM nginxinc/nginx-unprivileged:1.27.2-alpine AS runtime
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
+# Base image defaults to USER nginx; switch to root only for install/permissions,
+# then drop privileges again before the final image user.
+USER root
+
+# Readable by nginx (101); conf.d must stay traversable for the non-root runtime user.
+COPY --chown=101:101 --chmod=644 nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build --chown=101:101 /app/dist /usr/share/nginx/html
+
+RUN chmod 755 /etc/nginx \
+  && chmod 755 /etc/nginx/conf.d \
+  && chmod 644 /etc/nginx/conf.d/default.conf \
+  && chown -R 101:101 /usr/share/nginx/html \
+  && find /usr/share/nginx/html -type d -exec chmod 755 {} \; \
+  && find /usr/share/nginx/html -type f -exec chmod 644 {} \;
 
 USER 101
+
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
