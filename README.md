@@ -105,9 +105,9 @@ npm run build
 
 | Role | Email | Password |
 | --- | --- | --- |
-| Admin | `bhaskar@gmail.com` | `1234` |
-| Doctor | `dr.rivera@medisecure.demo` | `1234` |
-| Patient | `patient.one@medisecure.demo` | `1234` |
+| Admin | `bhaskar@gmail.com` | `12345678` |
+| Doctor | `dr.rivera@medisecure.demo` | `12345678` |
+| Patient | `patient.one@medisecure.demo` | `12345678` |
 
 ## Local development
 

@@ -15,7 +15,7 @@ from app.models.user import DoctorProfile, PatientProfile, User
 from datetime import UTC, datetime, timedelta
 
 
-DEMO_PASSWORD = "1234"
+DEMO_PASSWORD = "12345678"
 DEMO_ADMIN_EMAIL = "bhaskar@gmail.com"
 
 
@@ -28,7 +28,23 @@ def seed() -> None:
     db = SessionLocal()
     try:
         if db.scalar(select(User).where(User.email == DEMO_ADMIN_EMAIL)):
-            print("Demo data already present — skipping.")
+            # Keep demo accounts usable after DEMO_PASSWORD changes without wiping the DB.
+            demo_emails = (
+                DEMO_ADMIN_EMAIL,
+                "dr.rivera@medisecure.demo",
+                "dr.chen@medisecure.demo",
+                "dr.okafor@medisecure.demo",
+                "patient.one@medisecure.demo",
+                "patient.two@medisecure.demo",
+            )
+            updated = 0
+            for email in demo_emails:
+                user = db.scalar(select(User).where(User.email == email))
+                if user:
+                    user.password_hash = hash_password(DEMO_PASSWORD)
+                    updated += 1
+            db.commit()
+            print(f"Demo data already present — refreshed passwords for {updated} demo users.")
             return
 
         specs = [

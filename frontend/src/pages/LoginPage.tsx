@@ -9,9 +9,7 @@ import { Button, FieldError, Input, Label, Panel } from '@/components/ui'
 
 const schema = z.object({
   email: z.string().email('Valid email required'),
-  // Login must accept seeded demo passwords (e.g. 1234). New accounts still enforce
-  // min length 8 on the register / change-password flows and backend registration schema.
-  password: z.string().min(1, 'Password is required'),
+  password: z.string().min(8, 'Minimum 8 characters'),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -75,7 +73,7 @@ export function LoginPage() {
           </Link>
         </p>
         <p className="mt-3 text-center text-xs text-[var(--color-muted)]">
-          Demo: bhaskar@gmail.com / 1234
+          Demo: bhaskar@gmail.com / 12345678
         </p>
       </Panel>
     </div>
