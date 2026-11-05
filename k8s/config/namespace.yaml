@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: medisecure
+  labels:
+    app.kubernetes.io/name: medisecure
+    pod-security.kubernetes.io/enforce: restricted

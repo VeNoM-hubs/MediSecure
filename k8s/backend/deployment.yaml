@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medisecure-backend
+  namespace: medisecure
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: medisecure-backend
+  template:
+    metadata:
+      labels:
+        app: medisecure-backend
+    spec:
+      serviceAccountName: medisecure-backend
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: medisecure/backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: medisecure-config
+            - secretRef:
+                name: medisecure-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medisecure-backend
+  namespace: medisecure
+spec:
+  selector:
+    app: medisecure-backend
+  ports:
+    - port: 8000
+      targetPort: 8000

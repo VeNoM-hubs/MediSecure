@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: medisecure-config
+  namespace: medisecure
+data:
+  APP_NAME: MediSecure
+  APP_ENV: production
+  API_V1_PREFIX: /api/v1
+  CORS_ORIGINS: "https://medisecure.example.com"
+  SEED_DEMO_DATA: "false"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "15"
+  REFRESH_TOKEN_EXPIRE_DAYS: "7"
+  LOGIN_MAX_FAILURES: "5"
+  LOGIN_LOCKOUT_MINUTES: "15"
+  AUTH_RATE_LIMIT_PER_MINUTE: "20"

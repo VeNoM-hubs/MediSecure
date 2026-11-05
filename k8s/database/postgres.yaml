@@ -1,0 +1,71 @@
+# Optional in-cluster PostgreSQL for academic labs. Prefer managed DB in real environments.
+# Not exposed via Ingress / LoadBalancer.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: medisecure-db-pvc
+  namespace: medisecure
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medisecure-db
+  namespace: medisecure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medisecure-db
+  template:
+    metadata:
+      labels:
+        app: medisecure-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16.4-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: medisecure
+            - name: POSTGRES_USER
+              value: medisecure
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: medisecure-secrets
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: medisecure-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: medisecure-db
+  namespace: medisecure
+spec:
+  selector:
+    app: medisecure-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+  # ClusterIP only — never public
+  type: ClusterIP
