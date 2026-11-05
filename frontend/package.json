@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.15.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -36,5 +39,11 @@
     "typescript": "~7.0.2",
     "vite": "^8.3.5",
     "vitest": "^5.1.0"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-linux-x64-musl": "1.2.16",
+    "@rollup/rollup-linux-x64-musl": "4.67.5",
+    "@tailwindcss/oxide-linux-x64-musl": "4.3.4",
+    "lightningcss-linux-x64-musl": "1.33.0"
   }
 }
