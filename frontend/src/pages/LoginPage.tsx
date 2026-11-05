@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,7 +17,9 @@ type FormValues = z.infer<typeof schema>
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const [error, setError] = useState('')
+  const sessionExpired = params.get('expired') === '1'
   const {
     register,
     handleSubmit,
@@ -43,6 +45,11 @@ export function LoginPage() {
         <p className="mt-2 text-sm text-[var(--color-muted)]">Sign in to your secure portal</p>
       </div>
       <Panel>
+        {sessionExpired ? (
+          <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            Your session expired. Please sign in again.
+          </p>
+        ) : null}
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <Label>Email</Label>

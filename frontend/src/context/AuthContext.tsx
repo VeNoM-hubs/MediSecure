@@ -34,6 +34,7 @@ function toAuthUser(data: {
   user_id: string
   full_name: string
   role: Role
+  expires_in?: number
 }): AuthUser {
   return {
     access_token: data.access_token,
@@ -41,6 +42,7 @@ function toAuthUser(data: {
     user_id: data.user_id,
     full_name: data.full_name,
     role: data.role,
+    expires_at: Date.now() + (data.expires_in ?? 900) * 1000,
   }
 }
 

@@ -11,14 +11,20 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["JWT_SECRET_KEY"] = "test-secret-key-not-for-production"
 os.environ["SEED_DEMO_DATA"] = "false"
 os.environ["CORS_ORIGINS"] = "http://localhost:5173"
+os.environ["AUTH_RATE_LIMIT_ENABLED"] = "false"
+os.environ["APP_ENV"] = "test"
 
+from app.core.config import get_settings  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
 from app.core.rbac import Role  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.db.session import get_db  # noqa: E402
 from app.main import app  # noqa: E402
+from app.middleware.rate_limit import reset_rate_limit_buckets  # noqa: E402
 from app.models.user import DoctorProfile, PatientProfile, User  # noqa: E402
 from app.models.specialization import Specialization  # noqa: E402
+
+get_settings.cache_clear()
 
 
 @pytest.fixture()
@@ -88,6 +94,7 @@ def db_session():
 
 @pytest.fixture()
 def client(db_session):
+    reset_rate_limit_buckets()
     with TestClient(app) as c:
         yield c
 

@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from '@/components/AppShell'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { useAuth } from '@/context/AuthContext'
+import { AdminAppointmentsPage } from '@/pages/AdminAppointmentsPage'
 import {
   AdminAuditPage,
   AdminDoctorsPage,
@@ -9,8 +10,10 @@ import {
   AdminSpecializationsPage,
 } from '@/pages/AdminPages'
 import { AppointmentsPage } from '@/pages/AppointmentsPage'
+import { AvailabilityPage } from '@/pages/AvailabilityPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { DoctorDetailPage } from '@/pages/DoctorDetailPage'
+import { DoctorRecordsPage } from '@/pages/DoctorRecordsPage'
 import { DoctorsPage } from '@/pages/DoctorsPage'
 import { LandingPage } from '@/pages/LandingPage'
 import { LoginPage } from '@/pages/LoginPage'
@@ -47,9 +50,12 @@ export default function App() {
 
           <Route element={<ProtectedRoute roles={['doctor']} />}>
             <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/availability" element={<AvailabilityPage />} />
+            <Route path="/doctor/records" element={<DoctorRecordsPage />} />
           </Route>
 
           <Route element={<ProtectedRoute roles={['admin']} />}>
+            <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
             <Route path="/admin/patients" element={<AdminPatientsPage />} />
             <Route path="/admin/doctors" element={<AdminDoctorsPage />} />
             <Route path="/admin/specializations" element={<AdminSpecializationsPage />} />

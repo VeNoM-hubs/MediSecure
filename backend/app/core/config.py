@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     login_max_failures: int = 5
     login_lockout_minutes: int = 15
     auth_rate_limit_per_minute: int = 20
+    auth_rate_limit_enabled: bool = True
 
     @property
     def cors_origin_list(self) -> list[str]:

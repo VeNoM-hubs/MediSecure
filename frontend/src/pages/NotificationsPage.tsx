@@ -5,12 +5,18 @@ import { Button, EmptyState, PageHeader, Panel } from '@/components/ui'
 
 export function NotificationsPage() {
   const [items, setItems] = useState<NotificationItem[]>([])
+  const [unread, setUnread] = useState(0)
   const [error, setError] = useState('')
 
   async function load() {
     try {
-      const res = await api.get<NotificationItem[]>('/notifications')
-      setItems(res.data)
+      const [notes, count] = await Promise.all([
+        api.get<NotificationItem[]>('/notifications'),
+        api.get<{ unread_count: number }>('/notifications/unread-count'),
+      ])
+      setItems(notes.data)
+      setUnread(count.data.unread_count)
+      setError('')
     } catch (err) {
       setError(getErrorMessage(err))
     }
@@ -25,10 +31,20 @@ export function NotificationsPage() {
     await load()
   }
 
+  async function markAll() {
+    await api.post('/notifications/read-all')
+    await load()
+  }
+
   return (
     <div>
-      <PageHeader title="Notifications" subtitle="System and appointment updates for your account." />
+      <PageHeader title="Notifications" subtitle={`${unread} unread · in-app only for this academic demo.`} />
       {error ? <p className="mb-4 text-sm text-[var(--color-danger)]">{error}</p> : null}
+      <div className="mb-4">
+        <Button variant="secondary" onClick={() => void markAll()} disabled={unread === 0}>
+          Mark all read
+        </Button>
+      </div>
       <Panel>
         {items.length === 0 ? (
           <EmptyState message="No notifications." />

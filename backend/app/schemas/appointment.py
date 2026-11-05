@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.pagination import Page
+
 
 class AppointmentCreate(BaseModel):
     doctor_id: str
@@ -30,6 +32,11 @@ class AppointmentOut(BaseModel):
     created_at: datetime
 
 
+class SlotCreate(BaseModel):
+    starts_at: datetime
+    ends_at: datetime | None = None
+
+
 class SlotOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -38,3 +45,6 @@ class SlotOut(BaseModel):
     starts_at: datetime
     ends_at: datetime
     is_booked: bool
+
+
+AppointmentPage = Page[AppointmentOut]

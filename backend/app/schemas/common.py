@@ -50,3 +50,6 @@ class StatsOut(BaseModel):
     total_appointments: int
     active_users: int
     recent_security_events: int
+    pending_appointments: int = 0
+    completed_appointments: int = 0
+    cancelled_appointments: int = 0

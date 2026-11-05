@@ -1,39 +1,77 @@
-# Environment / secrets
+# Environment / secrets (never commit real values)
 .env
+.env.*
+!.env.example
+!.env*.example
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 *.pem
 *.key
+*.p12
+*.pfx
+*.jks
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+credentials.json
+**/secrets/
+**/secret.yaml
+!k8s/config/secret.example.yaml
+
+# Git metadata (never pack into archives / accidental copies)
+.git/
 
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
+*$py.class
 *.egg-info/
 .venv/
 venv/
+.envrc
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
 .coverage
+.coverage.*
 htmlcov/
 dist/
 build/
+*.egg
 
 # Node
 node_modules/
 frontend/dist/
 frontend/coverage/
+frontend/dist-ssr/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test databases / local DB files
+*.sqlite3
+*.sqlite
+*.db
+test.db
+*.dump
 
 # IDE / OS
 .idea/
 .vscode/
 *.swp
+*~
 .DS_Store
 Thumbs.db
 
 # Docker / local data
 postgres_data/
-*.sqlite3
+medisecure_postgres_data/
 
 # Sonar / Trivy caches
 .scannerwork/
@@ -41,6 +79,5 @@ postgres_data/
 sonar-reports/
 trivy-reports/
 
-# Alembic
-# keep versions; ignore local runtime
+# Alembic / local runtime
 backend/.coverage

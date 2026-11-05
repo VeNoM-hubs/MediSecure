@@ -26,6 +26,20 @@ def system_stats(
     doctors = db.scalar(select(func.count()).select_from(DoctorProfile)) or 0
     appointments = db.scalar(select(func.count()).select_from(Appointment)) or 0
     active_users = db.scalar(select(func.count()).select_from(User).where(User.is_active.is_(True))) or 0
+    pending = (
+        db.scalar(select(func.count()).select_from(Appointment).where(Appointment.status == "pending")) or 0
+    )
+    completed = (
+        db.scalar(select(func.count()).select_from(Appointment).where(Appointment.status == "completed")) or 0
+    )
+    cancelled = (
+        db.scalar(
+            select(func.count())
+            .select_from(Appointment)
+            .where(Appointment.status.in_(["cancelled", "rejected"]))
+        )
+        or 0
+    )
     since = datetime.now(UTC) - timedelta(days=7)
     security_events = (
         db.scalar(
@@ -51,6 +65,9 @@ def system_stats(
         total_appointments=appointments,
         active_users=active_users,
         recent_security_events=security_events,
+        pending_appointments=pending,
+        completed_appointments=completed,
+        cancelled_appointments=cancelled,
     )
 
 

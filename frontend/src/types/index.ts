@@ -6,6 +6,7 @@ export interface AuthUser {
   role: Role
   access_token: string
   refresh_token?: string
+  expires_at?: number
 }
 
 export interface UserPublic {
@@ -67,6 +68,9 @@ export interface Stats {
   total_appointments: number
   active_users: number
   recent_security_events: number
+  pending_appointments: number
+  completed_appointments: number
+  cancelled_appointments: number
 }
 
 export interface AuditLog {
