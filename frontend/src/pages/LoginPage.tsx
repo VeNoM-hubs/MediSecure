@@ -9,7 +9,9 @@ import { Button, FieldError, Input, Label, Panel } from '@/components/ui'
 
 const schema = z.object({
   email: z.string().email('Valid email required'),
-  password: z.string().min(8, 'Minimum 8 characters'),
+  // Login must accept seeded demo passwords (e.g. 1234). New accounts still enforce
+  // min length 8 on the register / change-password flows and backend registration schema.
+  password: z.string().min(1, 'Password is required'),
 })
 
 type FormValues = z.infer<typeof schema>
