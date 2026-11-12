@@ -22,7 +22,7 @@ spec:
           image: medisecure/frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -31,13 +31,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 80
+              port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 80
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 20
           resources:
@@ -58,4 +58,4 @@ spec:
     app: medisecure-frontend
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: 8080
