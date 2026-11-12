@@ -1,1 +1,0 @@
-"""MediSecure healthcare management API."""

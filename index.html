@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MediSecure — Healthcare & DevSecOps Demo</title>
+  <style>
+    :root {
+      --brand: #0a7ea4;
+      --brand-dark: #065f7c;
+      --teal: #0d9488;
+      --teal-soft: #ccfbf1;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #dbe4ee;
+      --panel: #ffffff;
+      --bg: #f0f7fb;
+      --sidebar: #04384c;
+      --sidebar-2: #0a5f7a;
+      --danger: #dc2626;
+      --success: #059669;
+      --warn: #d97706;
+      --info: #2563eb;
+      --shadow: 0 12px 32px rgba(4, 56, 76, 0.08);
+      --radius: 16px;
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 100% -10%, #cfeef8 0%, transparent 55%),
+        radial-gradient(900px 400px at -10% 20%, #d8f5ef 0%, transparent 50%),
+        var(--bg);
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .hidden { display: none !important; }
+
+    /* Shell */
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: linear-gradient(180deg, var(--sidebar), var(--sidebar-2));
+      color: #e8f6fb;
+      padding: 22px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .brand-block { padding: 8px 10px 18px; }
+    .brand-block h1 {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+    .brand-block p { margin: 6px 0 0; opacity: 0.75; font-size: 0.82rem; }
+    .nav-btn {
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: #dff4fb;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.14); color: #fff; }
+    .sidebar-foot {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.08);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .main { min-width: 0; display: flex; flex-direction: column; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 22px;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .menu-toggle {
+      display: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 700;
+    }
+    .topbar h2 { margin: 0; font-size: 1.25rem; letter-spacing: -0.02em; }
+    .top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+    .content { padding: 22px; }
+
+    /* UI primitives */
+    .grid { display: grid; gap: 14px; }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .stat .label { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+    .stat .value { font-size: 1.9rem; font-weight: 800; margin-top: 8px; color: var(--brand-dark); letter-spacing: -0.03em; }
+    .stat .hint { margin-top: 6px; color: var(--muted); font-size: 0.8rem; }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .section-head h3 { margin: 0; font-size: 1.05rem; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      transition: 0.15s ease;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--brand); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--brand-dark); }
+    .btn-teal { background: var(--teal); color: #fff; }
+    .btn-teal:hover:not(:disabled) { background: #0f766e; }
+    .btn-secondary { background: #fff; border: 1px solid var(--line); color: var(--ink); }
+    .btn-secondary:hover:not(:disabled) { background: #f0f9fc; }
+    .btn-danger { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+    .btn-sm { padding: 7px 10px; font-size: 0.84rem; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-size: 0.86rem; font-weight: 700; margin-bottom: 6px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(10, 126, 164, 0.16);
+    }
+    .error { color: var(--danger); font-size: 0.82rem; margin-top: 5px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { text-align: left; padding: 11px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 750;
+    }
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      text-transform: capitalize;
+    }
+    .b-ok { background: #d1fae5; color: #065f46; }
+    .b-warn { background: #ffedd5; color: #9a3412; }
+    .b-info { background: #dbeafe; color: #1e40af; }
+    .b-danger { background: #fee2e2; color: #991b1b; }
+    .b-muted { background: #f1f5f9; color: #475569; }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px 12px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+    }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .toolbar input, .toolbar select { max-width: 240px; }
+    .progress {
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), var(--teal));
+      width: 0;
+      transition: width 0.35s ease;
+    }
+    .pipeline-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .pipeline-step:last-child { border-bottom: 0; }
+    .step-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;
+    }
+    .step-icon.pass { background: #d1fae5; color: #065f46; }
+    .step-icon.run { background: #dbeafe; color: #1e40af; }
+    .step-icon.wait { background: #f1f5f9; color: #64748b; }
+    .step-icon.fail { background: #fee2e2; color: #991b1b; }
+    .metric-row { display: flex; justify-content: space-between; gap: 8px; margin: 8px 0; font-size: 0.92rem; }
+    .banner {
+      background: linear-gradient(135deg, #ecfeff, #e0f2fe);
+      border: 1px solid #a5f3fc;
+      color: #155e75;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+    .toast-wrap {
+      position: fixed; right: 16px; bottom: 16px; z-index: 40;
+      display: flex; flex-direction: column; gap: 8px;
+      max-width: min(360px, calc(100vw - 24px));
+    }
+    .toast {
+      background: #0f172a; color: #fff; padding: 12px 14px;
+      border-radius: 12px; box-shadow: var(--shadow);
+      animation: rise 0.2s ease;
+    }
+    .toast.ok { background: #065f46; }
+    .toast.err { background: #991b1b; }
+    @keyframes rise { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+      display: grid; place-items: center; padding: 16px; z-index: 30;
+    }
+    .modal {
+      width: min(560px, 100%);
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .modal h3 { margin: 0 0 8px; }
+    .modal p { color: var(--muted); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .security-grid .card h4 { margin: 0 0 6px; }
+    .security-grid .card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    .login-gate {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .login-card {
+      width: min(460px, 100%);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 30px 26px;
+    }
+    .login-card .brand {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--brand-dark);
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .login-card .sub { text-align: center; color: var(--muted); margin: 8px 0 22px; }
+    .demo-box {
+      margin-top: 16px;
+      background: #ecfeff;
+      border: 1px solid #a5f3fc;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.86rem;
+      color: #155e75;
+    }
+    .backdrop {
+      display: none;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 15;
+    }
+
+    @media (max-width: 1100px) {
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed; inset: 0 auto 0 0; width: min(84vw, 280px);
+        transform: translateX(-105%); transition: transform 0.2s ease; z-index: 20;
+      }
+      .sidebar.open { transform: none; }
+      .menu-toggle { display: inline-flex; }
+      .backdrop.open { display: block; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .sidebar { height: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login -->
+  <div id="login-gate" class="login-gate">
+    <div class="login-card">
+      <h1 class="brand">MediSecure</h1>
+      <p class="sub">Healthcare management &amp; DevSecOps demonstration</p>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="username" value="admin@medisecure.demo" required />
+          <div class="error" id="email-error"></div>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" value="demo1234" required />
+          <div class="error" id="password-error"></div>
+        </div>
+        <div class="error" id="login-error"></div>
+        <button class="btn btn-primary" type="submit" style="width:100%">Sign in</button>
+      </form>
+      <div class="demo-box">
+        <strong>Demo access</strong><br />
+        Email: <code>admin@medisecure.demo</code><br />
+        Password: <code>demo1234</code><br />
+        All clinical data is fictional and for demonstration only.
+      </div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="app hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-block">
+        <h1>MediSecure</h1>
+        <p>Hospital portal · DevSecOps demo</p>
+      </div>
+      <button class="nav-btn active" data-view="dashboard" type="button">Hospital Dashboard</button>
+      <button class="nav-btn" data-view="patients" type="button">Patients</button>
+      <button class="nav-btn" data-view="doctors" type="button">Doctors</button>
+      <button class="nav-btn" data-view="appointments" type="button">Appointments</button>
+      <button class="nav-btn" data-view="records" type="button">Medical Records</button>
+      <button class="nav-btn" data-view="devsecops" type="button">DevSecOps</button>
+      <button class="nav-btn" data-view="security" type="button">Security Controls</button>
+      <div class="sidebar-foot">
+        Simulated environment<br />
+        No real PHI · No live cloud calls
+      </div>
+    </aside>
+    <div class="backdrop" id="backdrop"></div>
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menu-toggle" type="button">Menu</button>
+          <h2 id="page-title">Hospital Dashboard</h2>
+        </div>
+        <div class="top-actions">
+          <span class="chip"><span class="dot"></span> Secure session</span>
+          <span class="chip" id="role-chip">Admin · RBAC</span>
+          <button class="btn btn-secondary btn-sm" id="logout-btn" type="button">Log out</button>
+        </div>
+      </header>
+      <div class="content" id="view"></div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
+  <div id="modal-root"></div>
+
+  <script>
+(function () {
+  "use strict";
+
+  var STORAGE = "medisecure_static_portal_v2";
+  var DEMO_USER = { email: "admin@medisecure.demo", password: "demo1234", name: "Alex Morgan", role: "admin" };
+
+  function isoDays(offset, hour) {
+    var d = new Date();
+    d.setDate(d.getDate() + offset);
+    d.setHours(hour || 10, 0, 0, 0);
+    return d.toISOString();
+  }
+
+  function seed() {
+    return {
+      session: null,
+      patients: [
+        { id: "p1", name: "Jordan Lee", age: 34, gender: "F", blood: "O+", condition: "Wellness follow-up", status: "active", phone: "+1-555-0101" },
+        { id: "p2", name: "Sam Patel", age: 41, gender: "M", blood: "A-", condition: "Hypertension (synthetic)", status: "active", phone: "+1-555-0102" },
+        { id: "p3", name: "Avery Nguyen", age: 29, gender: "X", blood: "B+", condition: "Dermatology consult", status: "active", phone: "+1-555-0103" },
+        { id: "p4", name: "Riley Brooks", age: 52, gender: "F", blood: "AB+", condition: "Cardiac screening", status: "inactive", phone: "+1-555-0104" }
+      ],
+      doctors: [
+        { id: "d1", name: "Dr. Maya Rivera", specialty: "General Practice", experience: 12, patients: 18, availability: "Mon–Fri" },
+        { id: "d2", name: "Dr. Wei Chen", specialty: "Cardiology", experience: 15, patients: 14, availability: "Tue–Sat" },
+        { id: "d3", name: "Dr. Amara Okafor", specialty: "Dermatology", experience: 8, patients: 11, availability: "Mon–Thu" },
+        { id: "d4", name: "Dr. Noah Berg", specialty: "Pediatrics", experience: 10, patients: 16, availability: "Wed–Sun" }
+      ],
+      appointments: [
+        { id: "a1", patientId: "p1", doctorId: "d1", when: isoDays(1, 9), reason: "Annual checkup", status: "confirmed" },
+        { id: "a2", patientId: "p2", doctorId: "d2", when: isoDays(2, 14), reason: "BP review", status: "pending" },
+        { id: "a3", patientId: "p3", doctorId: "d3", when: isoDays(-3, 11), reason: "Skin evaluation", status: "completed" },
+        { id: "a4", patientId: "p4", doctorId: "d2", when: isoDays(4, 16), reason: "ECG consult", status: "confirmed" },
+        { id: "a5", patientId: "p1", doctorId: "d4", when: isoDays(-10, 10), reason: "Referral discussion", status: "cancelled" }
+      ],
+      records: [
+        { id: "r1", patientId: "p1", doctorId: "d1", title: "Baseline wellness summary", diagnosis: "Healthy — synthetic", notes: "Demo record only.", date: isoDays(-10, 12) },
+        { id: "r2", patientId: "p2", doctorId: "d2", title: "Cardiology note", diagnosis: "Mild hypertension (synthetic)", notes: "Lifestyle counseling.", date: isoDays(-4, 15) },
+        { id: "r3", patientId: "p3", doctorId: "d3", title: "Dermatology assessment", diagnosis: "Contact dermatitis (synthetic)", notes: "Topical care plan.", date: isoDays(-3, 12) }
+      ],
+      audit: [
+        { id: "au1", actor: "Alex Morgan", action: "LOGIN_SUCCESS", detail: "Demo admin session started", at: isoDays(0, 8) },
+        { id: "au2", actor: "system", action: "SCAN_COMPLETE", detail: "Trivy image scan finished (demo)", at: isoDays(0, 7) },
+        { id: "au3", actor: "Jenkins", action: "PIPELINE_PASS", detail: "Build #248 quality gate passed (demo)", at: isoDays(-1, 18) }
+      ],
+      pipeline: {
+        running: false,
+        progress: 0,
+        steps: [
+          { id: "checkout", name: "GitHub checkout", tool: "GitHub", status: "pass", detail: "main @ demo-commit" },
+          { id: "build", name: "CI build", tool: "Jenkins", status: "pass", detail: "Build #248" },
+          { id: "sast", name: "Static analysis", tool: "SonarQube", status: "pass", detail: "Quality gate OK (demo)" },
+          { id: "deps", name: "Dependency scan", tool: "OWASP / npm audit", status: "pass", detail: "0 critical (demo)" },
+          { id: "image", name: "Container scan", tool: "Trivy", status: "pass", detail: "No critical CVEs (demo)" },
+          { id: "deploy", name: "Deploy to cluster", tool: "Kubernetes", status: "pass", detail: "medisecure namespace" },
+          { id: "observe", name: "Observability", tool: "AWS CloudWatch", status: "pass", detail: "Alarms green (demo)" }
+        ],
+        metrics: {
+          coverage: 86,
+          bugs: 0,
+          vulns: 2,
+          deployMinutes: 11,
+          uptime: 99.95
+        }
+      }
+    };
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE);
+      if (!raw) { var s = seed(); save(s); return s; }
+      var parsed = JSON.parse(raw);
+      if (!parsed.patients) throw new Error("bad");
+      return parsed;
+    } catch (e) {
+      var fresh = seed();
+      save(fresh);
+      return fresh;
+    }
+  }
+
+  function save(state) {
+    localStorage.setItem(STORAGE, JSON.stringify(state));
+  }
+
+  var state = load();
+  var currentView = "dashboard";
+  var filters = { patientQ: "", apptStatus: "all", recordQ: "" };
+
+  function uid(prefix) {
+    return prefix + "-" + Math.random().toString(36).slice(2, 9);
+  }
+
+  function toast(msg, type) {
+    var el = document.createElement("div");
+    el.className = "toast " + (type || "");
+    el.textContent = msg;
+    document.getElementById("toasts").appendChild(el);
+    setTimeout(function () { el.remove(); }, 2800);
+  }
+
+  function fmt(iso) {
+    try {
+      return new Date(iso).toLocaleString(undefined, {
+        weekday: "short", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      });
+    } catch (e) { return iso; }
+  }
+
+  function patientName(id) {
+    var p = state.patients.find(function (x) { return x.id === id; });
+    return p ? p.name : "—";
+  }
+
+  function doctorName(id) {
+    var d = state.doctors.find(function (x) { return x.id === id; });
+    return d ? d.name : "—";
+  }
+
+  function badge(status) {
+    var map = {
+      active: "b-ok", inactive: "b-muted", confirmed: "b-ok", pending: "b-warn",
+      completed: "b-info", cancelled: "b-danger", rejected: "b-danger",
+      pass: "b-ok", run: "b-info", wait: "b-muted", fail: "b-danger"
+    };
+    return '<span class="badge ' + (map[status] || "b-muted") + '">' + status + "</span>";
+  }
+
+  function empty(text) {
+    return '<div class="empty">' + text + "</div>";
+  }
+
+  function audit(action, detail) {
+    state.audit.unshift({
+      id: uid("au"),
+      actor: state.session ? state.session.name : "system",
+      action: action,
+      detail: detail,
+      at: new Date().toISOString()
+    });
+  }
+
+  function confirmModal(title, message, onYes) {
+    var root = document.getElementById("modal-root");
+    root.innerHTML =
+      '<div class="modal-backdrop" role="dialog" aria-modal="true">' +
+      '<div class="modal"><h3></h3><p></p><div class="modal-actions">' +
+      '<button type="button" class="btn btn-secondary btn-sm" id="m-cancel">Cancel</button>' +
+      '<button type="button" class="btn btn-danger btn-sm" id="m-ok">Confirm</button>' +
+      "</div></div></div>";
+    root.querySelector("h3").textContent = title;
+    root.querySelector("p").textContent = message;
+    root.querySelector("#m-cancel").onclick = function () { root.innerHTML = ""; };
+    root.querySelector("#m-ok").onclick = function () { root.innerHTML = ""; onYes(); };
+  }
+
+  /* ---------- Views ---------- */
+  function viewDashboard() {
+    var activePatients = state.patients.filter(function (p) { return p.status === "active"; }).length;
+    var pending = state.appointments.filter(function (a) { return a.status === "pending"; }).length;
+    var completed = state.appointments.filter(function (a) { return a.status === "completed"; }).length;
+    return (
+      '<div class="banner">Demonstration portal with fictional patients, doctors, and pipeline metrics. Not connected to live systems.</div>' +
+      '<div class="grid grid-4">' +
+        stat("Patients", state.patients.length, activePatients + " active") +
+        stat("Doctors", state.doctors.length, "4 specialties") +
+        stat("Appointments", state.appointments.length, pending + " pending") +
+        stat("Records", state.records.length, completed + " visits completed") +
+      "</div>" +
+      '<div class="grid grid-2" style="margin-top:14px">' +
+        '<section class="card"><div class="section-head"><h3>Upcoming appointments</h3></div>' +
+        apptTable(state.appointments.filter(function (a) {
+          return new Date(a.when) >= new Date() && a.status !== "cancelled";
+        }).slice(0, 5), true) +
+        "</section>" +
+        '<section class="card"><div class="section-head"><h3>Recent audit events</h3></div>' +
+        auditList(state.audit.slice(0, 5)) +
+        "</section>" +
+      "</div>"
+    );
+  }
+
+  function stat(label, value, hint) {
+    return '<div class="card stat"><div class="label">' + label + '</div><div class="value">' + value +
+      '</div><div class="hint">' + hint + "</div></div>";
+  }
+
+  function viewPatients() {
+    var q = (filters.patientQ || "").toLowerCase();
+    var rows = state.patients.filter(function (p) {
+      return !q || p.name.toLowerCase().indexOf(q) >= 0 || p.condition.toLowerCase().indexOf(q) >= 0;
+    });
+    return (
+      '<section class="card">' +
+      '<div class="section-head"><h3>Patient management</h3>' +
+      '<button class="btn btn-primary btn-sm" type="button" id="add-patient">Add patient</button></div>' +
+      '<div class="toolbar"><input id="patient-q" placeholder="Search patients…" value="' + escapeAttr(filters.patientQ) + '" /></div>' +
+      (rows.length ? '<div class="table-wrap"><table><thead><tr><th>Name</th><th>Age</th><th>Blood</th><th>Condition</th><th>Status</th><th></th></tr></thead><tbody>' +
+        rows.map(function (p) {
+          return "<tr><td>" + p.name + "</td><td>" + p.age + "</td><td>" + p.blood + "</td><td>" + p.condition +
+            "</td><td>" + badge(p.status) + '</td><td><button class="btn btn-danger btn-sm" data-del-patient="' + p.id + '">Remove</button></td></tr>';
+        }).join("") + "</tbody></table></div>" : empty("No patients match your search.")) +
+      "</section>"
+    );
+  }
+
+  function viewDoctors() {
+    return (
+      '<div class="grid grid-2">' +
+      state.doctors.map(function (d) {
+        return '<article class="card"><div class="section-head"><h3>' + d.name + "</h3>" + badge("active") + "</div>" +
+          "<p><strong>Specialty:</strong> " + d.specialty + "</p>" +
+          "<p><strong>Experience:</strong> " + d.experience + " years</p>" +
+          "<p><strong>Assigned patients:</strong> " + d.patients + "</p>" +
+          "<p><strong>Availability:</strong> " + d.availability + "</p></article>";
+      }).join("") +
+      "</div>"
+    );
+  }
+
+  function viewAppointments() {
+    var list = state.appointments.filter(function (a) {
+      return filters.apptStatus === "all" || a.status === filters.apptStatus;
+    }).sort(function (a, b) { return new Date(a.when) - new Date(b.when); });
+
+    return (
+      '<section class="card" style="margin-bottom:14px">' +
+      '<div class="section-head"><h3>Book appointment</h3></div>' +
+      '<form id="appt-form" class="grid grid-2" novalidate>' +
+      '<div class="field"><label for="appt-patient">Patient</label><select id="appt-patient" required>' +
+      state.patients.map(function (p) { return '<option value="' + p.id + '">' + p.name + "</option>"; }).join("") +
+      '</select></div>' +
+      '<div class="field"><label for="appt-doctor">Doctor</label><select id="appt-doctor" required>' +
+      state.doctors.map(function (d) { return '<option value="' + d.id + '">' + d.name + " — " + d.specialty + "</option>"; }).join("") +
+      '</select></div>' +
+      '<div class="field"><label for="appt-when">Date &amp; time</label><input id="appt-when" type="datetime-local" required /><div class="error" id="appt-when-error"></div></div>' +
+      '<div class="field"><label for="appt-reason">Reason</label><input id="appt-reason" maxlength="120" placeholder="Synthetic reason" /></div>' +
+      '<div><button class="btn btn-primary" type="submit">Create appointment</button></div>' +
+      "</form></section>" +
+      '<section class="card"><div class="section-head"><h3>Appointment board</h3>' +
+      '<select id="appt-filter"><option value="all">All statuses</option>' +
+      ["pending","confirmed","completed","cancelled"].map(function (s) {
+        return '<option value="' + s + '"' + (filters.apptStatus === s ? " selected" : "") + ">" + s + "</option>";
+      }).join("") +
+      "</select></div>" +
+      apptTable(list, false) +
+      "</section>"
+    );
+  }
+
+  function apptTable(list, compact) {
+    if (!list.length) return empty("No appointments to display.");
+    return '<div class="table-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>When</th><th>Reason</th><th>Status</th>' +
+      (compact ? "" : "<th>Actions</th>") + "</tr></thead><tbody>" +
+      list.map(function (a) {
+        var actions = "";
+        if (!compact) {
+          if (a.status === "pending") {
+            actions += '<button class="btn btn-primary btn-sm" data-status="' + a.id + ':confirmed">Confirm</button> ';
+            actions += '<button class="btn btn-danger btn-sm" data-status="' + a.id + ':cancelled">Cancel</button> ';
+          }
+          if (a.status === "confirmed") {
+            actions += '<button class="btn btn-teal btn-sm" data-status="' + a.id + ':completed">Complete</button> ';
+            actions += '<button class="btn btn-danger btn-sm" data-status="' + a.id + ':cancelled">Cancel</button>';
+          }
+        }
+        return "<tr><td>" + patientName(a.patientId) + "</td><td>" + doctorName(a.doctorId) + "</td><td>" +
+          fmt(a.when) + "</td><td>" + (a.reason || "—") + "</td><td>" + badge(a.status) + "</td>" +
+          (compact ? "" : '<td><div style="display:flex;gap:6px;flex-wrap:wrap">' + actions + "</div></td>") + "</tr>";
+      }).join("") +
+      "</tbody></table></div>";
+  }
+
+  function viewRecords() {
+    var q = (filters.recordQ || "").toLowerCase();
+    var rows = state.records.filter(function (r) {
+      return !q || r.title.toLowerCase().indexOf(q) >= 0 || r.diagnosis.toLowerCase().indexOf(q) >= 0 ||
+        patientName(r.patientId).toLowerCase().indexOf(q) >= 0;
+    });
+    return (
+      '<section class="card" style="margin-bottom:14px">' +
+      '<div class="section-head"><h3>Add medical record</h3></div>' +
+      '<form id="record-form" class="grid grid-2" novalidate>' +
+      '<div class="field"><label for="rec-patient">Patient</label><select id="rec-patient">' +
+      state.patients.map(function (p) { return '<option value="' + p.id + '">' + p.name + "</option>"; }).join("") +
+      '</select></div>' +
+      '<div class="field"><label for="rec-doctor">Doctor</label><select id="rec-doctor">' +
+      state.doctors.map(function (d) { return '<option value="' + d.id + '">' + d.name + "</option>"; }).join("") +
+      '</select></div>' +
+      '<div class="field"><label for="rec-title">Title</label><input id="rec-title" required minlength="2" /></div>' +
+      '<div class="field"><label for="rec-dx">Diagnosis</label><input id="rec-dx" placeholder="Synthetic diagnosis" /></div>' +
+      '<div class="field" style="grid-column:1/-1"><label for="rec-notes">Notes</label><textarea id="rec-notes" rows="3"></textarea></div>' +
+      '<div><button class="btn btn-primary" type="submit">Save record</button></div>' +
+      "</form></section>" +
+      '<section class="card"><div class="section-head"><h3>Medical records</h3>' +
+      '<input id="record-q" placeholder="Search records…" value="' + escapeAttr(filters.recordQ) + '" style="max-width:240px" /></div>' +
+      (rows.length ? rows.map(function (r) {
+        return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px">' +
+          "<strong>" + r.title + "</strong><div style='color:var(--muted);font-size:0.9rem;margin-top:4px'>" +
+          patientName(r.patientId) + " · " + doctorName(r.doctorId) + " · " + fmt(r.date) + "</div>" +
+          "<div style='margin-top:8px'><strong>Diagnosis:</strong> " + (r.diagnosis || "—") + "</div>" +
+          "<div>" + (r.notes || "") + "</div></div>";
+      }).join("") : empty("No records found.")) +
+      "</section>"
+    );
+  }
+
+  function viewDevSecOps() {
+    var p = state.pipeline;
+    var steps = p.steps.map(function (s) {
+      return '<div class="pipeline-step"><div class="step-icon ' + s.status + '">' +
+        (s.status === "pass" ? "OK" : s.status === "run" ? "…" : s.status === "fail" ? "!" : "–") +
+        "</div><div><strong>" + s.name + "</strong> · " + s.tool + "<div style='color:var(--muted);font-size:0.86rem'>" +
+        s.detail + " · " + badge(s.status) + "</div></div></div>";
+    }).join("");
+
+    return (
+      '<div class="banner">All GitHub, Jenkins, SonarQube, Trivy, Kubernetes and CloudWatch values below are <strong>demonstration data</strong> simulated in the browser.</div>' +
+      '<div class="grid grid-4">' +
+        stat("Coverage", p.metrics.coverage + "%", "SonarQube demo") +
+        stat("Open bugs", p.metrics.bugs, "Quality gate demo") +
+        stat("Findings", p.metrics.vulns, "Non-critical demo alerts") +
+        stat("Uptime", p.metrics.uptime + "%", "CloudWatch demo") +
+      "</div>" +
+      '<div class="grid grid-2" style="margin-top:14px">' +
+        '<section class="card"><div class="section-head"><h3>CI/CD pipeline simulation</h3>' +
+        '<button class="btn btn-teal btn-sm" id="run-pipeline" type="button"' + (p.running ? " disabled" : "") + ">" +
+        (p.running ? "Running…" : "Run pipeline") + "</button></div>" +
+        '<div class="progress" aria-label="Pipeline progress"><span id="pipe-progress" style="width:' + p.progress + '%"></span></div>' +
+        '<div style="margin-top:8px;color:var(--muted);font-size:0.85rem">Progress: <span id="pipe-pct">' + p.progress + "</span>%</div>" +
+        steps +
+        "</section>" +
+        '<section class="card"><div class="section-head"><h3>Toolchain status</h3></div>' +
+        toolRow("GitHub", "Source control", "Connected (demo)") +
+        toolRow("Jenkins", "CI orchestration", "Build #248 passed") +
+        toolRow("SonarQube", "SAST / quality gate", "Gate passed") +
+        toolRow("Dependency scan", "Libraries & CVEs", "2 low findings") +
+        toolRow("Trivy", "Image & FS scanning", "No critical CVEs") +
+        toolRow("Kubernetes", "Workload runtime", "3 pods healthy") +
+        toolRow("AWS CloudWatch", "Logs & alarms", "No active alarms") +
+        '<div style="margin-top:16px" class="section-head"><h3>Security metrics</h3></div>' +
+        '<div class="metric-row"><span>Mean deploy time</span><strong>' + p.metrics.deployMinutes + " min</strong></div>" +
+        '<div class="metric-row"><span>Encrypted secrets</span><strong>100% (demo)</strong></div>' +
+        '<div class="metric-row"><span>RBAC enforced</span><strong>Yes</strong></div>' +
+        "</section>" +
+      "</div>"
+    );
+  }
+
+  function toolRow(name, role, status) {
+    return '<div class="metric-row"><div><strong>' + name + '</strong><div style="color:var(--muted);font-size:0.8rem">' +
+      role + "</div></div><span class='badge b-ok'>" + status + "</span></div>";
+  }
+
+  function viewSecurity() {
+    return (
+      '<div class="banner">Security capabilities illustrated for academic DevSecOps storytelling. Controls here are simulated.</div>' +
+      '<div class="grid grid-3 security-grid">' +
+        secCard("Encryption", "Demo TLS in transit and encrypted secret references for configuration values.") +
+        secCard("RBAC", "Role-based access for admin operators with least-privilege navigation.") +
+        secCard("Authentication", "Local demo sign-in with session persistence in browser storage.") +
+        secCard("Audit logging", "Immutable-style event trail for logins, scans and appointment changes.") +
+        secCard("Vulnerability scanning", "Simulated SonarQube, dependency and Trivy results on the DevSecOps board.") +
+        secCard("Runtime hardening", "Narrates non-root containers, restricted Pod Security and read-only filesystem patterns.") +
+      "</div>" +
+      '<section class="card" style="margin-top:14px"><div class="section-head"><h3>Audit log</h3>' +
+      '<button class="btn btn-secondary btn-sm" id="clear-audit" type="button">Clear demo log</button></div>' +
+      auditList(state.audit) +
+      "</section>"
+    );
+  }
+
+  function secCard(title, text) {
+    return '<article class="card"><h4>' + title + "</h4><p>" + text + "</p></article>";
+  }
+
+  function auditList(items) {
+    if (!items.length) return empty("No audit events yet.");
+    return '<div class="table-wrap"><table><thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Detail</th></tr></thead><tbody>' +
+      items.map(function (a) {
+        return "<tr><td>" + fmt(a.at) + "</td><td>" + a.actor + "</td><td>" + a.action + "</td><td>" + a.detail + "</td></tr>";
+      }).join("") +
+      "</tbody></table></div>";
+  }
+
+  function escapeAttr(s) {
+    return String(s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  }
+
+  var TITLES = {
+    dashboard: "Hospital Dashboard",
+    patients: "Patients",
+    doctors: "Doctors",
+    appointments: "Appointments",
+    records: "Medical Records",
+    devsecops: "DevSecOps Dashboard",
+    security: "Security Controls"
+  };
+
+  function renderView() {
+    if (currentView === "dashboard") return viewDashboard();
+    if (currentView === "patients") return viewPatients();
+    if (currentView === "doctors") return viewDoctors();
+    if (currentView === "appointments") return viewAppointments();
+    if (currentView === "records") return viewRecords();
+    if (currentView === "devsecops") return viewDevSecOps();
+    if (currentView === "security") return viewSecurity();
+    return empty("Unknown view");
+  }
+
+  function bindView() {
+    var view = document.getElementById("view");
+
+    var pq = document.getElementById("patient-q");
+    if (pq) {
+      pq.oninput = function () {
+        filters.patientQ = pq.value;
+        renderApp(false);
+        var el = document.getElementById("patient-q");
+        if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+      };
+    }
+
+    var addP = document.getElementById("add-patient");
+    if (addP) {
+      addP.onclick = function () {
+        var root = document.getElementById("modal-root");
+        root.innerHTML =
+          '<div class="modal-backdrop"><div class="modal"><h3>Add fictional patient</h3>' +
+          '<form id="new-patient" novalidate>' +
+          '<div class="field"><label for="np-name">Full name</label><input id="np-name" required minlength="2" /></div>' +
+          '<div class="field"><label for="np-age">Age</label><input id="np-age" type="number" min="1" max="120" required /></div>' +
+          '<div class="field"><label for="np-blood">Blood type</label><input id="np-blood" placeholder="O+" /></div>' +
+          '<div class="field"><label for="np-cond">Condition</label><input id="np-cond" placeholder="Synthetic condition" /></div>' +
+          '<div class="error" id="np-error"></div>' +
+          '<div class="modal-actions"><button type="button" class="btn btn-secondary btn-sm" id="np-cancel">Cancel</button>' +
+          '<button type="submit" class="btn btn-primary btn-sm">Save</button></div></form></div></div>';
+        root.querySelector("#np-cancel").onclick = function () { root.innerHTML = ""; };
+        root.querySelector("#new-patient").onsubmit = function (e) {
+          e.preventDefault();
+          var name = document.getElementById("np-name").value.trim();
+          var age = Number(document.getElementById("np-age").value);
+          var err = document.getElementById("np-error");
+          if (name.length < 2 || !age) { err.textContent = "Name and age are required."; return; }
+          state.patients.push({
+            id: uid("p"), name: name, age: age, gender: "U",
+            blood: document.getElementById("np-blood").value.trim() || "O+",
+            condition: document.getElementById("np-cond").value.trim() || "General (synthetic)",
+            status: "active", phone: "+1-555-0199"
+          });
+          audit("PATIENT_CREATE", "Added fictional patient " + name);
+          save(state);
+          root.innerHTML = "";
+          toast("Patient added", "ok");
+          renderApp();
+        };
+      };
+    }
+
+    view.querySelectorAll("[data-del-patient]").forEach(function (btn) {
+      btn.onclick = function () {
+        var id = btn.getAttribute("data-del-patient");
+        confirmModal("Remove patient", "Remove this fictional patient record from the demo?", function () {
+          state.patients = state.patients.filter(function (p) { return p.id !== id; });
+          audit("PATIENT_DELETE", "Removed patient " + id);
+          save(state);
+          toast("Patient removed", "ok");
+          renderApp();
+        });
+      };
+    });
+
+    var apptFilter = document.getElementById("appt-filter");
+    if (apptFilter) {
+      apptFilter.onchange = function () {
+        filters.apptStatus = apptFilter.value;
+        renderApp();
+      };
+    }
+
+    var apptForm = document.getElementById("appt-form");
+    if (apptForm) {
+      apptForm.onsubmit = function (e) {
+        e.preventDefault();
+        var whenEl = document.getElementById("appt-when");
+        document.getElementById("appt-when-error").textContent = "";
+        if (!whenEl.value) {
+          document.getElementById("appt-when-error").textContent = "Choose a date and time.";
+          return;
+        }
+        var when = new Date(whenEl.value);
+        if (isNaN(when.getTime()) || when < new Date()) {
+          document.getElementById("appt-when-error").textContent = "Pick a future date and time.";
+          return;
+        }
+        var appt = {
+          id: uid("a"),
+          patientId: document.getElementById("appt-patient").value,
+          doctorId: document.getElementById("appt-doctor").value,
+          when: when.toISOString(),
+          reason: document.getElementById("appt-reason").value.trim() || "General consult (synthetic)",
+          status: "pending"
+        };
+        state.appointments.push(appt);
+        audit("APPOINTMENT_CREATE", "Booked for " + patientName(appt.patientId));
+        save(state);
+        toast("Appointment created", "ok");
+        renderApp();
+      };
+    }
+
+    view.querySelectorAll("[data-status]").forEach(function (btn) {
+      btn.onclick = function () {
+        var parts = btn.getAttribute("data-status").split(":");
+        var appt = state.appointments.find(function (a) { return a.id === parts[0]; });
+        if (!appt) return;
+        appt.status = parts[1];
+        audit("APPOINTMENT_STATUS", appt.id + " → " + parts[1]);
+        save(state);
+        toast("Appointment " + parts[1], "ok");
+        renderApp();
+      };
+    });
+
+    var rq = document.getElementById("record-q");
+    if (rq) {
+      rq.oninput = function () {
+        filters.recordQ = rq.value;
+        renderApp(false);
+        var el = document.getElementById("record-q");
+        if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+      };
+    }
+
+    var recordForm = document.getElementById("record-form");
+    if (recordForm) {
+      recordForm.onsubmit = function (e) {
+        e.preventDefault();
+        var title = document.getElementById("rec-title").value.trim();
+        if (title.length < 2) { toast("Title is required", "err"); return; }
+        state.records.unshift({
+          id: uid("r"),
+          patientId: document.getElementById("rec-patient").value,
+          doctorId: document.getElementById("rec-doctor").value,
+          title: title,
+          diagnosis: document.getElementById("rec-dx").value.trim() || "Synthetic note",
+          notes: document.getElementById("rec-notes").value.trim() || "Demo clinical note.",
+          date: new Date().toISOString()
+        });
+        audit("RECORD_CREATE", title);
+        save(state);
+        toast("Medical record saved", "ok");
+        renderApp();
+      };
+    }
+
+    var runPipe = document.getElementById("run-pipeline");
+    if (runPipe) {
+      runPipe.onclick = function () { runPipelineSimulation(); };
+    }
+
+    var clearAudit = document.getElementById("clear-audit");
+    if (clearAudit) {
+      clearAudit.onclick = function () {
+        confirmModal("Clear audit log", "Clear demonstration audit events?", function () {
+          state.audit = [];
+          save(state);
+          toast("Audit log cleared", "ok");
+          renderApp();
+        });
+      };
+    }
+  }
+
+  function runPipelineSimulation() {
+    if (state.pipeline.running) return;
+    state.pipeline.running = true;
+    state.pipeline.progress = 0;
+    state.pipeline.steps.forEach(function (s) { s.status = "wait"; s.detail = "Queued (demo)"; });
+    save(state);
+    renderApp();
+    audit("PIPELINE_START", "Simulated Jenkins pipeline started");
+
+    var i = 0;
+    function tick() {
+      if (i > 0) {
+        state.pipeline.steps[i - 1].status = "pass";
+        state.pipeline.steps[i - 1].detail = "Completed (demo)";
+      }
+      if (i < state.pipeline.steps.length) {
+        state.pipeline.steps[i].status = "run";
+        state.pipeline.steps[i].detail = "Running (demo)";
+        state.pipeline.progress = Math.round(((i + 0.45) / state.pipeline.steps.length) * 100);
+        save(state);
+        renderApp();
+        i += 1;
+        setTimeout(tick, 700);
+      } else {
+        state.pipeline.progress = 100;
+        state.pipeline.running = false;
+        state.pipeline.metrics.deployMinutes = 8 + Math.floor(Math.random() * 6);
+        audit("PIPELINE_PASS", "Simulated pipeline finished successfully");
+        save(state);
+        toast("Pipeline simulation complete", "ok");
+        renderApp();
+      }
+    }
+    setTimeout(tick, 400);
+  }
+
+  function renderApp(resetScroll) {
+    document.getElementById("page-title").textContent = TITLES[currentView] || "MediSecure";
+    document.querySelectorAll(".nav-btn").forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-view") === currentView);
+    });
+    document.getElementById("view").innerHTML = renderView();
+    bindView();
+    if (resetScroll !== false) window.scrollTo(0, 0);
+  }
+
+  function showApp() {
+    document.getElementById("login-gate").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    document.getElementById("role-chip").textContent = (state.session.name || "Admin") + " · RBAC";
+    renderApp();
+  }
+
+  function showLogin() {
+    document.getElementById("app").classList.add("hidden");
+    document.getElementById("login-gate").classList.remove("hidden");
+  }
+
+  document.querySelectorAll(".nav-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      currentView = btn.getAttribute("data-view");
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("backdrop").classList.remove("open");
+      renderApp();
+    });
+  });
+
+  document.getElementById("menu-toggle").addEventListener("click", function () {
+    document.getElementById("sidebar").classList.add("open");
+    document.getElementById("backdrop").classList.add("open");
+  });
+  document.getElementById("backdrop").addEventListener("click", function () {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("backdrop").classList.remove("open");
+  });
+
+  document.getElementById("logout-btn").addEventListener("click", function () {
+    audit("LOGOUT", "Demo session ended");
+    state.session = null;
+    save(state);
+    toast("Signed out", "ok");
+    showLogin();
+  });
+
+  document.getElementById("login-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = document.getElementById("email").value.trim().toLowerCase();
+    var password = document.getElementById("password").value;
+    document.getElementById("email-error").textContent = "";
+    document.getElementById("password-error").textContent = "";
+    document.getElementById("login-error").textContent = "";
+    var ok = true;
+    if (!email || email.indexOf("@") < 1) {
+      document.getElementById("email-error").textContent = "Enter a valid email.";
+      ok = false;
+    }
+    if (!password || password.length < 6) {
+      document.getElementById("password-error").textContent = "Password required.";
+      ok = false;
+    }
+    if (!ok) return;
+    if (email !== DEMO_USER.email || password !== DEMO_USER.password) {
+      document.getElementById("login-error").textContent = "Invalid demo credentials.";
+      return;
+    }
+    state.session = { email: DEMO_USER.email, name: DEMO_USER.name, role: DEMO_USER.role };
+    audit("LOGIN_SUCCESS", "Demo admin signed in");
+    save(state);
+    toast("Welcome to MediSecure", "ok");
+    currentView = "dashboard";
+    showApp();
+  });
+
+  if (state.session) showApp();
+  else showLogin();
+})();
+  </script>
+</body>
+</html>
