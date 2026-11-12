@@ -26,6 +26,13 @@ spec:
       labels:
         app: medisecure-db
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: postgres
           image: postgres:16.4-alpine
@@ -41,6 +48,11 @@ spec:
                 secretKeyRef:
                   name: medisecure-secrets
                   key: POSTGRES_PASSWORD
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
